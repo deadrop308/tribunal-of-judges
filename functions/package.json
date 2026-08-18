@@ -1,0 +1,13 @@
+{
+  "name": "functions",
+  "description": "Cloud Functions for Tribunal of Judges",
+  "main": "index.js",
+  "engines": {
+    "node": "22"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.6.0",
+    "firebase-functions": "^7.3.2"
+  },
+  "private": true
+}

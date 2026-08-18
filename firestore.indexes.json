@@ -1,0 +1,13 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "verdicts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "judgeId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
