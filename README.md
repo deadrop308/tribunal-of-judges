@@ -1,34 +1,47 @@
 # Tribunal of Judges
 
-A webapp where you submit a charge (a precise yes/no-style question), 2 AI
-advocates argue for it, 2 argue against it, and 3 AI judges — each modeled
-on a historical judge's reasoning style — deliver a verdict for you to weigh
-yourself.
+A webapp where you submit a charge (a precise, decidable question — a
+required short title, plus optional longer details for complex cases), 2 AI
+advocates argue for it, 2 argue against it, and the AI judges you pick from
+the bench deliver a verdict each, for you to weigh yourself.
 
 Built with GitHub + Firebase (Hosting + Cloud Functions) + OpenRouter.
 
 ## How it works
 
 - **Frontend** (`public/`): pick past judges and/or a past charge (or write
-  a new one), choose a mode, run the trial, see results.
+  a new one — a Title, and optionally longer Charge Details), optionally
+  give the 4 advocates a name and/or personality for the trial, choose a
+  mode, run the trial, see results.
 - **Backend** (`functions/index.js`): 4 Cloud Functions:
-  - `runTribunal` — the main event. Calls OpenRouter for the 4 advocates
-    and the judges you selected, and returns the full transcript + verdicts.
+  - `runTribunal` — the main event. Resolves/creates the charge, calls
+    OpenRouter for the 4 advocates and the judges you selected, and returns
+    the full transcript + verdicts.
   - `listJudges` / `listCharges` — populate the picker dropdowns from
     Firestore.
-  - `seedJudges` — one-time helper to populate the default 3-judge roster.
+  - `seedJudges` — populates the default judge roster. Idempotent per judge
+    ID, so it's safe to click any time (e.g. after the roster grows in
+    code) — it only inserts judges that don't already exist, never
+    duplicates.
   Your OpenRouter API key lives only here, never in the frontend.
 - **Firestore** stores three things:
-  - `charges` — every charge you've ever submitted, reusable from the
-    dropdown.
+  - `charges` — `{ title, text? }`. Every charge you've submitted, reusable
+    from the dropdown (which shows the title only). If `text` is present,
+    that — not the title — is the actual charge sent to advocates and
+    judges.
   - `judges` — judge personas as data (not hardcoded), so you can add more
-    later without touching code.
+    later without touching code. Each has a `methodologyNote` (shown in the
+    UI) stating the research basis and that it's a hypothetical
+    reasoning-style exercise, not a prediction of the real person's views.
   - `verdicts` — every verdict, linked to the judge who gave it. Each time
     a judge rules again, their last 10 past verdicts are fed back to them
     as precedent context — so a judge's reasoning builds on their own past
     rulings over time, the way real judicial precedent works.
+- **Advocate names/personalities** are optional, per-trial only, and never
+  saved to Firestore — collected fresh in the UI each run and discarded.
 - **Two modes**:
-  - *Same model* — everyone uses Claude (`anthropic/claude-sonnet-4.6`).
+  - *Same model* — everyone uses Claude, via `DEFAULT_MODEL` in
+    `functions/index.js`.
   - *Mixed bench* — a fixed lineup of different models per role (Claude,
     GPT, Gemini, Llama), configured in `ADVOCATE_MODEL_LINEUP` /
     `JUDGE_MODEL_LINEUP` in `functions/index.js`.
@@ -86,14 +99,13 @@ This deploys Hosting (the frontend), Firestore rules/indexes, and all 4
 Cloud Functions. Firebase will print the Hosting URL when it's done.
 
 **First-time only**: open the deployed site and click **"Seed Default
-Judges"** — this populates the 3 starting judges (Learned Hand, Blackstone,
-Roy Bean) into Firestore. After that, the judge picker will be populated
-for every future visit, and you can add more judges directly in Firestore
-if you want to expand the roster.
-
-Since this is a class project you don't intend to share publicly, you can
-leave the Hosting URL undistributed — it still satisfies "deployed via
-Firebase" without you needing to promote it anywhere.
+Judges"** — this populates the default roster (currently 6 judges: Learned
+Hand, Blackstone, Roy Bean, Barak, Elon, Shamgar) into Firestore. After
+that, the judge picker is populated for every future visit. The button
+sticks around (relabeled **"Sync Default Judges"**) so you can safely
+click it again any time the roster in code grows — it never duplicates
+judges that already exist — and you can also add judges directly in
+Firestore if you want to expand the roster by hand.
 
 ## Local testing (optional)
 
@@ -104,12 +116,19 @@ firebase emulators:start --only functions,hosting
 
 ## Notes
 
-- The `MODEL_LINEUP` model strings in `functions/index.js` are current as
-  of this writing — double check they still exist at
-  https://openrouter.ai/models before your demo, since providers rename or
-  deprecate model slugs over time.
-- Judge personas are framed as "in the style of" historical judges
-  (Learned Hand, William Blackstone, Roy Bean) — real documented reasoning
-  traditions, not literal impersonation, and all long-deceased figures.
+- The model strings in `ADVOCATE_MODEL_LINEUP` / `JUDGE_MODEL_LINEUP` /
+  `DEFAULT_MODEL` in `functions/index.js` are current as of this writing —
+  double check them against the live catalog at
+  `https://openrouter.ai/api/v1/models` before your demo, since providers
+  rename or deprecate model slugs over time (one lineup entry is a
+  `-preview` slug, which is especially prone to this).
+- Judge personas are framed as "reasoning style inspired by [person],"
+  never literal impersonation. Most are long-deceased historical figures
+  (Learned Hand, William Blackstone, Roy Bean, Menachem Elon, Meir
+  Shamgar); one (Aharon Barak) is a living public figure, whose persona is
+  deliberately scoped to documented interpretive methodology only. Every
+  judge has a `methodologyNote` in the UI making this framing explicit.
+- Each trial makes 4 advocate calls plus one call per judge you select
+  (currently up to 6), all routed through OpenRouter.
 - Consider setting a spending cap in your OpenRouter account settings
-  while testing, since each trial run makes 7 model calls.
+  while testing.

@@ -83,7 +83,8 @@ main {
   font-weight: 500;
 }
 
-#charge-input {
+#charge-title-input,
+#charge-text-input {
   width: 100%;
   font-family: var(--body);
   font-size: 1.15rem;
@@ -93,6 +94,27 @@ main {
   background: #fdfcf7;
   resize: vertical;
   color: var(--ink);
+}
+
+#charge-text-input {
+  font-size: 1rem;
+}
+
+.charge-details-label {
+  margin-top: 18px;
+}
+
+.helper-note {
+  margin: 6px 2px 0;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+#charge-title-input:disabled,
+#charge-text-input:disabled {
+  background: var(--paper-dim);
+  color: var(--text-dim);
 }
 
 .seed-banner {
@@ -138,11 +160,6 @@ main {
   border-radius: 3px;
   background: #fdfcf7;
   color: var(--ink);
-}
-
-#charge-input:disabled {
-  background: var(--paper-dim);
-  color: var(--text-dim);
 }
 
 .judge-picker {
@@ -194,9 +211,74 @@ main {
   color: var(--text-dim);
 }
 
+.judge-checkbox .methodology-note {
+  margin-top: 4px;
+  max-width: 46em;
+}
+
+.methodology-note {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
 .empty-note {
   color: var(--text-dim);
   font-size: 0.9rem;
+}
+
+.advocates-picker {
+  margin-top: 22px;
+}
+
+.advocate-roles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 640px) {
+  .advocate-roles { grid-template-columns: 1fr; }
+}
+
+.advocate-role {
+  border: 2px solid var(--paper-dim);
+  border-radius: 3px;
+  padding: 14px;
+}
+
+.advocate-role-label {
+  margin: 0 0 8px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--oxblood);
+}
+
+.advocate-name {
+  width: 100%;
+  font-family: var(--body);
+  font-size: 0.95rem;
+  padding: 8px 10px;
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  background: #fdfcf7;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.advocate-personality {
+  width: 100%;
+  font-family: var(--body);
+  font-size: 0.92rem;
+  padding: 8px 10px;
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  background: #fdfcf7;
+  color: var(--ink);
+  resize: vertical;
 }
 
 .mode-row {

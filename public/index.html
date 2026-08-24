@@ -21,7 +21,7 @@
 
   <main>
     <section id="seed-banner" class="seed-banner" hidden>
-      <p>No judges on the bench yet. Seed the default roster (Learned Hand, Blackstone, Roy Bean) to get started.</p>
+      <p id="seed-banner-text">No judges on the bench yet. Seed the default roster (Learned Hand, Blackstone, Roy Bean, Barak, Elon, Shamgar) to get started.</p>
       <button id="seed-btn" class="submit-btn secondary small">Seed Default Judges</button>
     </section>
 
@@ -34,12 +34,46 @@
         </select>
       </div>
 
-      <label for="charge-input" class="filing-label">The Charge</label>
-      <textarea id="charge-input" placeholder="e.g. Should Jon Snow be executed for the killing of Daenerys Targaryen?" rows="3"></textarea>
+      <label for="charge-title-input" class="filing-label">Title</label>
+      <input type="text" id="charge-title-input" placeholder="e.g. Should Jon Snow be executed for the killing of Daenerys Targaryen?" />
+
+      <label for="charge-text-input" class="filing-label charge-details-label">Charge Details (optional)</label>
+      <textarea id="charge-text-input" placeholder="Add more detail if you like. If left blank, the Title alone is used as the full charge." rows="4"></textarea>
+      <p class="helper-note">Keep it concise if used — around 200-300 words works well.</p>
 
       <div class="judge-picker">
         <span class="filing-label">The Bench <em>(select who presides)</em></span>
         <div id="judge-checkboxes" class="judge-checkboxes"></div>
+      </div>
+
+      <div class="advocates-picker">
+        <span class="filing-label">The Advocates <em>(optional — name &amp; personality per role, used for this trial only)</em></span>
+        <div class="advocate-roles">
+          <div class="advocate-role">
+            <p class="advocate-role-label">For — Advocate 1</p>
+            <input type="text" id="for1-name" class="advocate-name" placeholder="General Defense" />
+            <textarea id="for1-personality" class="advocate-personality" placeholder="Optional personality / voice for this advocate." rows="3"></textarea>
+            <p class="helper-note">~200-300 words works well.</p>
+          </div>
+          <div class="advocate-role">
+            <p class="advocate-role-label">For — Advocate 2</p>
+            <input type="text" id="for2-name" class="advocate-name" placeholder="General Defense" />
+            <textarea id="for2-personality" class="advocate-personality" placeholder="Optional personality / voice for this advocate." rows="3"></textarea>
+            <p class="helper-note">~200-300 words works well.</p>
+          </div>
+          <div class="advocate-role">
+            <p class="advocate-role-label">Against — Advocate 1</p>
+            <input type="text" id="against1-name" class="advocate-name" placeholder="General Prosecution" />
+            <textarea id="against1-personality" class="advocate-personality" placeholder="Optional personality / voice for this advocate." rows="3"></textarea>
+            <p class="helper-note">~200-300 words works well.</p>
+          </div>
+          <div class="advocate-role">
+            <p class="advocate-role-label">Against — Advocate 2</p>
+            <input type="text" id="against2-name" class="advocate-name" placeholder="General Prosecution" />
+            <textarea id="against2-personality" class="advocate-personality" placeholder="Optional personality / voice for this advocate." rows="3"></textarea>
+            <p class="helper-note">~200-300 words works well.</p>
+          </div>
+        </div>
       </div>
 
       <div class="mode-row">
