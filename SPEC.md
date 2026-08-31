@@ -104,6 +104,22 @@ trial and discarded after the run.
 - Firestore: `firestore.rules` denies all direct client read/write —
   every access goes through a callable Cloud Function using the Admin SDK
 - Frontend: static files only, no secrets, no direct database access
+- **Input limits**: `runTribunal` rejects oversized input with
+  `HttpsError('invalid-argument', ...)` before any OpenRouter call —
+  charge title ≤300 chars, charge text ≤3000 chars, advocate name ≤100
+  chars, advocate personality ≤2000 chars
+- **Prompt-injection framing**: every system/user prompt sent to
+  OpenRouter (advocates and judges alike) is prefixed with a notice that
+  frames all user-supplied content (charge, advocate name/personality,
+  a judge's own past verdicts) as case material to reason about, never
+  as instructions to follow — see `INJECTION_NOTICE` in
+  `functions/index.js`
+- **Output cap**: every OpenRouter call sets `max_tokens: 600`
+- **App Check**: enforced (`APP_CHECK_ENFORCED = true` in
+  `functions/index.js`) on all four callables, using reCAPTCHA Enterprise
+  (`public/app.js` activates `ReCaptchaEnterpriseProvider` with the site
+  key in `public/firebase-config.js`) — calls without a valid App Check
+  token are rejected with `UNAUTHENTICATED`. See SPECLOG.md #13.
 
 ## 7. Explicitly out of scope
 

@@ -1,5 +1,19 @@
 // Initialize Firebase (config injected via firebase-config.js)
 firebase.initializeApp(window.FIREBASE_CONFIG);
+
+// App Check, reCAPTCHA Enterprise provider. The App Check SDK loads the
+// reCAPTCHA Enterprise script itself (no manual <script> tag needed).
+// Server-side enforcement is ON (APP_CHECK_ENFORCED in
+// functions/index.js) — every callable rejects requests with no valid
+// token, so this activation is required for the app to function, not
+// just a hardening extra.
+if (window.APP_CHECK_SITE_KEY) {
+  firebase.appCheck().activate(
+    new firebase.appCheck.ReCaptchaEnterpriseProvider(window.APP_CHECK_SITE_KEY),
+    true
+  );
+}
+
 const functions = firebase.functions();
 
 const runTribunal = functions.httpsCallable("runTribunal");

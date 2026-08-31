@@ -127,3 +127,50 @@ confirmed current. `gemini-3.1-pro-preview` remains a `-preview` slug
 (Google still hasn't shipped a non-preview Gemini 3 pro-tier model) and so
 remains the one most likely to need re-checking first if a Mixed Bench run
 starts failing on the AGAINST_1 role.
+
+## 13. Hardening: input limits, prompt-injection framing, output cap, App Check wiring
+Charge text and advocate personality are free text the user controls, sent
+straight into system/user prompts — an obvious injection surface ("ignore
+previous instructions", "reveal your system prompt", etc.) and an
+unbounded-cost surface (nothing capped input or output length). Addressed
+in `functions/index.js`:
+- Server-side length limits (charge title 300 / text 3000 / advocate name
+  100 / personality 2000 chars), checked in `runTribunal` before any
+  OpenRouter call, rejecting with `HttpsError('invalid-argument', ...)`.
+- `INJECTION_NOTICE` — a fixed line prepended to every prompt built by
+  `advocatePrompt`, `judgeSystemPrompt`, and `judgeUserPrompt` — frames all
+  user-supplied content (charge, advocate name/personality, and a judge's
+  own past verdicts pulled back in as precedent) as case material only,
+  never as instructions. Verified live: an adversarial charge + advocate
+  personality both explicitly instructing the model to reveal its system
+  prompt and output a marker string produced neither — every role stayed
+  in character and refused.
+- `max_tokens: 600` added to every `callOpenRouter` call, bounding
+  per-call cost regardless of input size.
+
+Also added Firebase App Check, so `runTribunal`, `listCharges`,
+`listJudges`, and `seedJudges` only accept calls that carry a valid App
+Check token — i.e. calls actually originating from the deployed web app,
+not a bare script hitting the callable HTTP endpoint directly (as the
+length-limit and injection tests above did, deliberately, to test).
+Provider is reCAPTCHA Enterprise (not the plain reCAPTCHA v3 provider —
+the site was registered as an Enterprise key in Google Cloud's reCAPTCHA
+console), so the client uses `firebase.appCheck.ReCaptchaEnterpriseProvider`
+in `public/app.js`, keyed off `window.APP_CHECK_SITE_KEY` in
+`public/firebase-config.js`. Rollout was staged deliberately, since
+flipping server-side enforcement before the client can attach a token
+would lock out the real web app with no recovery path short of a
+redeploy:
+1. Ship the client-side activation code first, with `APP_CHECK_ENFORCED`
+   still `false` server-side — harmless no-op until enforcement is on.
+2. Register the app for App Check in the Firebase console (App Check >
+   Apps > register with reCAPTCHA Enterprise, using the same site key).
+3. Confirm the deployed client actually mints a token — verified directly
+   via `firebase.appCheck().getToken(true)` in a real browser session
+   against the live site, which returned a token successfully.
+4. Only then flip `APP_CHECK_ENFORCED` to `true` and redeploy functions.
+
+Verified after enabling: a direct curl POST to the `listJudges` callable
+endpoint with no token now gets `401 UNAUTHENTICATED`; the real deployed
+web app (which attaches a token automatically via the SDK) still
+completes a full trial end-to-end.
